@@ -28,3 +28,8 @@ So far there is enough to start the `Flask` server (not recommended for producti
 
 The `flask` command relies on the `FLASK_APP` environment variable defined in `.flaskenv`.
 
+## Run the test cases
+
+```bash
+python -m unittest
+```
