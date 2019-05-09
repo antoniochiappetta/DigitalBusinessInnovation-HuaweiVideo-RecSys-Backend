@@ -1,19 +1,21 @@
 import unittest
 
-from app import app, db
+from app import create_app, db
 from app.models import User, Movie
-from config import basedir
+from tests import TestConfig
 
 
 class UserModelCase(unittest.TestCase):
-    def setup(self):
-        app.config['TESTING'] = True
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + + os.path.join(basedir, 'test.db')
+    def setUp(self):
+        self.app = create_app(TestConfig)
+        self.app_context = self.app.app_context()
+        self.app_context.push()
         db.create_all()
 
     def tearDown(self):
         db.session.remove()
         db.drop_all()
+        self.app_context.pop()
 
     def test_password_hashing(self):
         u = User(username='susan')
@@ -25,6 +27,7 @@ class UserModelCase(unittest.TestCase):
         u = User(username='john')
         u.set_password('a')
         m = Movie(title='Pulp Fiction', description='John Travolta\'s movie')
+
         db.session.add(u)
         db.session.add(m)
         db.session.commit()

@@ -1,12 +1,14 @@
-from app import app
-from flask import make_response, jsonify
+from flask import make_response, jsonify, Blueprint
 
 
-@app.route('/')
+bp = Blueprint('routers', __name__)
+
+
+@bp.route('/')
 def index():
     return "Hello, World!"  # TODO: add api version list
 
 
-@app.errorhandler(404)
+@bp.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 400)

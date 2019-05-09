@@ -1,6 +1,7 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from flask import url_for
 from app import db, login
 
 
@@ -37,6 +38,26 @@ class User(UserMixin, db.Model):
             Interaction.user_id == self.id,
             Interaction.movie_id == movie.id).count() > 0
 
+    def to_dict(self, include_email=False):
+        data = {
+            'id': self.id,
+            'username': self.username,
+            '_links': {
+                'self': url_for('api.get_user', id=self.id),
+                'watched_movies': url_for('api.watched_movies', id=self.id)
+            }
+        }
+        if include_email:
+            data['email'] = self.email
+        return data
+
+    def from_dict(self, data, new_user=False):
+        for field in ['username', 'email']:
+            if field in data:
+                setattr(self, field, data[field])
+        if new_user and 'password' in data:
+            self.set_password(data['password'])
+
 
 # Helper for LoginManager to load users from model
 @login.user_loader
@@ -53,6 +74,18 @@ class Movie(db.Model):
 
     def __repr__(self):
         return '<Movie {}>'.format(self.title)
+
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            '_links': {
+                'self': url_for('api.get_movie', id=self.id),
+                'trailer': self.link
+            }
+        }
+        return data
 
 
 class Interaction(db.Model):
