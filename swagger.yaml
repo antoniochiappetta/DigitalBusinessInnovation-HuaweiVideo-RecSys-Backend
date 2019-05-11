@@ -15,6 +15,8 @@ tags:
   description: "Access to Petstore orders"
 - name: "user"
   description: "Operations about user"
+- name: token
+  description: Operations to manage tokens required by api auth.
 schemes:
 - "https"
 paths:
@@ -183,7 +185,7 @@ paths:
   /token:
     post:
       tags:
-      - "user"
+      - "token"
       summary: "Logs user into the system"
       description: "Use base64 encoded http basic auth in header + https"
       operationId: "loginUser"
@@ -212,7 +214,7 @@ paths:
       - basic_auth: []
     delete:
       tags:
-      - "user"
+      - "token"
       summary: "Revoke user's token"
       description: "Delete the current toker, so log out the user"
       operationId: "logoutUser"
@@ -286,7 +288,7 @@ paths:
       tags:
       - "user"
       summary: "Delete user"
-      description: "This can only be done by the logged in user."
+      description: "This can only be done by the logged in user. Requires basic (login username and password) auth."
       operationId: "deleteUser"
       produces:
       - "application/xml"
@@ -303,7 +305,7 @@ paths:
         403:
           description: "Access denied"
       security:
-      - api_key: []
+      - basic_auth: []
   /interaction:
     post:
       tags:

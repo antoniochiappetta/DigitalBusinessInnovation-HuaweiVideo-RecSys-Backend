@@ -15,8 +15,9 @@ class ApiResponse(object):
         return payload
 
 
-def error_response(status_code, message=None):
-    payload = ApiResponse.to_dict(status_code, HTTP_STATUS_CODES.get(status_code, 'Unknown error'), message)
+def error_response(status_code, status='', message=None):
+    status = status if status != '' else HTTP_STATUS_CODES.get(status_code, 'Unknown error')
+    payload = ApiResponse.to_dict(status_code, status, message)
     response = jsonify(payload)
     response.status_code = status_code
     return response
@@ -24,3 +25,7 @@ def error_response(status_code, message=None):
 
 def bad_request(message):
     return error_response(400, message)
+
+
+def bad_input(message):
+    return error_response(405, status='Invalid input', message=message)
