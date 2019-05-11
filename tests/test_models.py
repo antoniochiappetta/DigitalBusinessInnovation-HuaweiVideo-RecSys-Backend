@@ -1,8 +1,8 @@
 import unittest
 
 from app import create_app, db
-from app.models import User, Movie
-from tests import TestConfig
+from app.models import User, Movie, Interaction
+from tests.test_config import TestConfig
 
 
 class UserModelCase(unittest.TestCase):
@@ -25,29 +25,89 @@ class UserModelCase(unittest.TestCase):
 
     def test_watch(self):
         u = User(username='john')
-        u.set_password('a')
         m = Movie(title='Pulp Fiction', description='John Travolta\'s movie')
 
         db.session.add(u)
         db.session.add(m)
         db.session.commit()
 
-        self.assertEqual(u.watched_movies.all(), [])
-        self.assertEqual(m.spectators.all(), [])
+        self.assertEqual(u.watched_movies, [])
+        self.assertEqual(m.spectators, [])
 
         u.watch(m)
         db.session.commit()
         self.assertTrue(u.has_watched(m))
-        self.assertEqual(u.watched_movies.count(), 1)
-        self.assertEqual(u.watched_movies.first().title, 'Pulp Fiction')
-        self.assertEqual(m.spectators.count(), 1)
-        self.assertEqual(m.spectators.first().username, 'john')
+        self.assertEqual(len(u.watched_movies), 1)
+        self.assertEqual(u.watched_movies[0].movie.title, 'Pulp Fiction')
+        self.assertEqual(len(m.spectators), 1)
+        self.assertEqual(m.spectators[0].user.username, 'john')
 
-        u.un_watch(m)
+    def test_update_rate(self):
+        u = User()
+        m = Movie()
+        u.watch(m)
+
+        db.session.add(u)
+        db.session.add(m)
         db.session.commit()
-        self.assertFalse(u.has_watched(m))
-        self.assertEqual(u.watched_movies.count(), 0)
-        self.assertEqual(m.spectators.count(), 0)
+        self.assertEqual((0.0, 0), Interaction.compute_explicit_rate(m.id))
+
+        u.watch_rate(m, 2.0)
+        db.session.commit()
+        self.assertEqual((2.0, 1), Interaction.compute_explicit_rate(m.id))
+
+        u.watch_rate(m, Interaction.IMPLICIT_RATE)
+        db.session.commit()
+        self.assertEqual((2.0, 1), Interaction.compute_explicit_rate(m.id))
+
+    def test_compute_score(self):
+        u1 = User()
+        u2 = User()
+        u3 = User()
+        m = Movie(title='Pulp Fiction', description='John Travolta\'s movie')
+        u1.watch_rate(m, 1.0)
+        u2.watch(m)
+        u3.watch_rate(m, 5.0)
+
+        db.session.add(u1)
+        db.session.add(u2)
+        db.session.add(m)
+        db.session.commit()
+
+        score, support = Interaction.compute_explicit_rate(m.id)
+        self.assertEqual(2, support)
+        self.assertEqual(3.0, score)
+
+    def test_user_to_dict(self):
+        u = User(username='T', firstName='F', lastName='L', email='e')
+        db.session.add(u)
+        db.session.commit()
+
+        json = {'id': 1, 'username': 'T', 'firstName': 'F', 'lastName': 'L', 'email': 'e',
+                '_links': {
+                    'self': 'http://localhost:5000/api/users/1',
+                    'recommended_movies': 'http://localhost:5000/api/movie/1/recommended',
+                    'watched_movies': 'http://localhost:5000/api/movie/1/watched'}}
+
+        self.assertEqual(json, u.to_dict(include_email=True))
+
+    def test_movie_to_dict(self):
+        m = Movie(title='T', description='D', video='v')
+        db.session.add(m)
+        db.session.commit()
+
+        json = {'id': 1, 'title': 'T', 'description': 'D',
+            'rating': {
+                'score': 0.0,
+                'support': 0
+            },
+            '_links': {
+                'self': 'http://localhost:5000/api/movie/1',
+                'video': 'v'
+            }
+        }
+
+        self.assertEqual(json, m.to_dict())
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-from app.api import  bp
+from app.api import bp
 
 
 @bp.route('/users/<int:id>', methods=['GET'])
@@ -8,11 +8,6 @@ def get_user(id):
 
 @bp.route('/users', methods=['GET'])
 def get_users():
-    pass
-
-
-@bp.route('/users/<int:id>/watched_movies', methods=['GET'])
-def get_watched_movies(id):
     pass
 
 
