@@ -1,9 +1,12 @@
-import base64, os
+import base64
+import os
 from datetime import datetime, timedelta
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
+
 from flask import url_for
+from flask_login import UserMixin
 from sqlalchemy import func
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from app import db, login
 
 

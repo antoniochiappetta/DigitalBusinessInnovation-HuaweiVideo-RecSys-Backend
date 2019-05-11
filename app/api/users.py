@@ -12,7 +12,6 @@ def get_user(id):
     if g.current_user.id != id:
         return bad_input("Access denied")
     return jsonify(g.current_user.to_dict())
-    #return jsonify(User.query().get_or_404(id).to_dict())
 
 
 @bp.route('/user', methods=['POST'])
@@ -54,7 +53,7 @@ def update_user(id):
 
 @bp.route('/user/<int:id>', methods=['DELETE'])
 @token_auth.login_required
-def update_user(id):
+def delete_user(id):
     if g.current_user.id != id:
         return bad_input("Access denied")
     User.quey.filter_by(id=id).delete()
