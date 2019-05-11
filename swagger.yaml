@@ -113,7 +113,7 @@ paths:
           description: "User not found"
       security:
       - api_key: []
-  /movies/searchByKeywords:
+  /movie/searchByKeywords:
     get:
       tags: ["movie"]
       summary: "Finds Movies by keyword"
@@ -422,13 +422,16 @@ definitions:
       title:
         type: "string"
         example: "Pulp Fiction"
+      description:
+        type: "string"
+        example: "A movie with John Travolta"
       rating:
         type: "object"
         properties:
           score:
-            type: "integer"
-            minimum: 1
-            maximum: 5
+            type: "number"
+            minimum: 1.0
+            maximum: 5.0
           support:
             type: integer
             format: int32
@@ -536,3 +539,6 @@ definitions:
         description: "If rating is included, the the interaction is an explicit rating. Otherwise implicit"
         minimum: 1
         maximum: 5
+      ts:
+        type: 'string'
+        format: 'date-time'
