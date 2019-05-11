@@ -109,6 +109,17 @@ class UserModelCase(unittest.TestCase):
 
         self.assertEqual(json, m.to_dict())
 
+    def test_token(self):
+        u = User(username='utoken')
+        t = u.get_token()
+        db.session.add(u)
+        db.session.commit()
+        self.assertEqual(u, User.check_token(t))
+
+        u.revoke_token()
+        db.session.commit()
+        self.assertIsNone(User.check_token(t))
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=1)
