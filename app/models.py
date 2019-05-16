@@ -76,9 +76,9 @@ class User(UserMixin, db.Model):
             'firstName': self.firstName,
             'lastName': self.lastName,
             '_links': {
-                'self': url_for('api.get_user', id=self.id),
-                'watched_movies': url_for('api.get_watched_movies', id=self.id),
-                'recommended_movies': url_for('api.get_recommended_movies', id=self.id)
+                'self': url_for('api.get_user', id=self.id, _external=True),
+                'watched_movies': url_for('api.get_watched_movies', id=self.id, _external=True),
+                'recommended_movies': url_for('api.get_recommended_movies', id=self.id, _external=True)
             }
         }
         if include_email:
@@ -88,8 +88,9 @@ class User(UserMixin, db.Model):
     def from_dict(self, data, new_user=False):
         fields = ['username', 'email']
         if new_user:
-            fields.append(['firstName', 'lastName'])
-        for field in ['username', 'email']:
+            fields.append('firstName')
+            fields.append('lastName')
+        for field in fields:
             if field in data:
                 setattr(self, field, data[field])
         if new_user and 'password' in data:
@@ -147,7 +148,7 @@ class Movie(PaginatedAPIMixin, db.Model):
                 'support': support
             },
             '_links': {
-                'self': url_for('api.get_movie', id=self.id),
+                'self': url_for('api.get_movie', id=self.id, _external=True),
                 'video': self.video
             }
         }
