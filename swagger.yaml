@@ -63,7 +63,7 @@ paths:
           description: "Access denied"
       security:
       - api_key: []
-  /movie/watched:
+  /movie/watched/{user_id}:
     get:
       tags: ["movie"]
       summary: "Watched movies from an user"
@@ -89,7 +89,7 @@ paths:
           description: "User not found"
       security:
       - api_key: []
-  /movie/recommended:
+  /movie/recommended/{user_id}:
     get:
       tags: ["movie"]
       summary: "Popular movies"
