@@ -20,9 +20,6 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login.init_app(app)
 
-    from app.routes import bp as routers_bp
-    app.register_blueprint(routers_bp)
-
     from app.api import bp as api_bp
     app.register_blueprint(api_bp, url_prefix='/api')
 
@@ -44,4 +41,4 @@ def create_app(config_class=Config):
     return app
 
 
-from app import routes, models
+from app import models

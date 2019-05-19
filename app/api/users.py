@@ -1,4 +1,4 @@
-from flask import jsonify, url_for, request
+from flask import jsonify, url_for, request, g
 from app import db
 from app.api import bp
 from app.api.errors import bad_input
@@ -6,7 +6,7 @@ from app.api.auth import token_auth
 from app.models import User
 
 
-@bp.route('/users/<int:id>', methods=['GET'])
+@bp.route('/user/<int:id>', methods=['GET'])
 @token_auth.login_required
 def get_user(id):
     if g.current_user.id != id:
