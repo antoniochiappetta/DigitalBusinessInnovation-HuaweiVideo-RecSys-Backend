@@ -85,9 +85,9 @@ class UserModelCase(unittest.TestCase):
 
         json = {'id': 1, 'username': 'T', 'firstName': 'F', 'lastName': 'L', 'email': 'e',
                 '_links': {
-                    'self': 'http://localhost:5000/api/users/1',
-                    'recommended_movies': 'http://localhost:5000/api/movie/1/recommended',
-                    'watched_movies': 'http://localhost:5000/api/movie/1/watched'}}
+                    'self': 'http://localhost:5000/api/user/1',
+                    'recommended_movies': 'http://localhost:5000/api/movie/recommended/1',
+                    'watched_movies': 'http://localhost:5000/api/movie/watched/1'}}
 
         self.assertEqual(json, u.to_dict(include_email=True))
 
