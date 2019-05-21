@@ -329,6 +329,8 @@ paths:
           description: "Access denied, user not found or no token"
         404:
           description: "Movie not found"
+        405:
+          description: "Invalid input"
       security:
       - api_key: []
   /interaction/{user_id}:{movie_id}/explicit:
@@ -354,6 +356,37 @@ paths:
       responses:
         200:
           description: "Succed, the explicit rating given"
+          schema:
+            $ref: "#/definitions/Interaction"
+        400:
+          description: "Invalid parameters or not existing"
+        404:
+          description: "Rate missing for this movie from this user"
+      security:
+      - api_key: []
+/interaction/{user_id}:{movie_id}/implicit:
+    get:
+      tags:
+      - "interaction"
+      summary: "Get the implicit rate"
+      description: "Get the implicit rate by the user for a specific movie. If the user has rated the movie, will be returned the same rate without score."
+      produces:
+        - "application/xml"
+        - "application/json"
+      parameters:
+      - name: "user_id"
+        in: path
+        required: true
+        type: integer
+        format: int64
+      - name: "movie_id"
+        in: path
+        required: true
+        type: integer
+        format: int64
+      responses:
+        200:
+          description: "Succeed, the implicit rating (user_id, movie_id and TS)"
           schema:
             $ref: "#/definitions/Interaction"
         400:

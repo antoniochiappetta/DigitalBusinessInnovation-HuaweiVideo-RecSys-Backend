@@ -50,6 +50,12 @@ class User(UserMixin, db.Model):
             Interaction.user_id == self.id,
             Interaction.movie_id == movie.id).count() > 0
 
+    def has_rated(self, movie):
+        return Interaction.query.filter(
+            Interaction.user_id == self.id,
+            Interaction.movie_id == movie.id,
+            Interaction.score != Interaction.IMPLICIT_RATE).count() > 0
+
     def get_token(self, expires_in=3600):
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
