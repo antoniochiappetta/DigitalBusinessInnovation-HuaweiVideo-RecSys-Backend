@@ -14,32 +14,34 @@ def create_interaction():
         if field not in data:
             return bad_input('must include at least username, email and password fields')
 
-    user = g.current_user.id
+    user = g.current_user
     if user.id != data['user_id']:
         return error_response(403, status="Access denied")
 
-    movie = Movie.query.get_or_404(id, description='Movie not found')
+    with db.session.no_autoflush:
+        movie = Movie.query.get_or_404(data['movie_id'], description='Movie not found')
 
-    if 'rating' in data:
-        if 1 <= data['rating'] <= 5:
-            user.watch_rate(movie, data['rating'])
+        if 'rating' in data:
+            if 1 <= data['rating'] <= 5:
+                user.watch_rate(movie, data['rating'])
+            else:
+                bad_input('Rating must be in between 1 and 5')
         else:
-            bad_input('Rating must be in between 1 and 5')
-    else:
-        user.watch(movie)
+            user.watch(movie)
 
-    db.session.commit()
+        db.session.commit()
+
     response = error_response(status_code=201, status='Created', message='interaction registered')
     response.status_code = 201
-    response.headers['Location'] = url_for('api.get_interaction_%s' % 'explicit' if 'rating' in data else 'implicit',
-                                           id=user.id)
+    response.headers['Location'] = url_for('api.get_interaction_%s' % ('explicit' if 'rating' in data else 'implicit'),
+                                           user_id=user.id, movie_id=movie.id)
     return response
 
 
 @bp.route('/interaction/<int:user_id>:<int:movie_id>/explicit', methods=['GET'])
 @token_auth.login_required
 def get_interaction_explicit(user_id, movie_id):
-    user = g.current_user.id
+    user = g.current_user
     if user.id != user_id:
         return error_response(403, status="Access denied")
 
@@ -57,7 +59,7 @@ def get_interaction_explicit(user_id, movie_id):
 @bp.route('/interaction/<int:user_id>:<int:movie_id>/implicit', methods=['GET'])
 @token_auth.login_required
 def get_interaction_implicit(user_id, movie_id):
-    user = g.current_user.id
+    user = g.current_user
     if user.id != user_id:
         return error_response(403, status="Access denied")
 

@@ -3,7 +3,7 @@ import unittest
 from flask import jsonify
 from base64 import b64encode
 from app import create_app, db
-from app.models import User, Movie
+from app.models import User, Movie, Interaction
 from tests.test_config import TestConfig
 
 
@@ -209,3 +209,150 @@ class ApiCase(unittest.TestCase):
 
         self.assertEqual(200, rv_watched.status_code)
         self.assertEqual(expected, rv_watched.get_json())
+
+    ##################
+    # Interaction API
+    ##################
+
+    def testEmptyCreateInteraction(self):
+        rv, u = self._fixture_get_token()
+
+        rv_interaction = self.client.post('/api/interaction',
+                                          headers={'Authorization': 'Bearer %s' % rv.get_json()['token']})
+
+        self.assertEqual(405, rv_interaction.status_code)
+        self.assertEqual({'code': 405,
+                          'type': 'Invalid input',
+                          'message': 'must include at least username, email and password fields'},
+                         rv_interaction.get_json())
+
+    def testAccessDeniedCreateInteraction(self):
+        rv, u = self._fixture_get_token()
+
+        rv_interaction = self.client.post('/api/interaction',
+                                          json={'movie_id': 1, 'user_id': 2},
+                                          headers={'Authorization': 'Bearer %s' % rv.get_json()['token']})
+
+        self.assertEqual(403, rv_interaction.status_code)
+        self.assertEqual({'code': 403,
+                          'type': 'Access denied',
+                          'message': None},
+                         rv_interaction.get_json())
+
+    def testMovieNotFoundCreateInteraction(self):
+        rv, u = self._fixture_get_token()
+
+        rv_interaction = self.client.post('/api/interaction',
+                                          json={'movie_id': 1, 'user_id': 1},
+                                          headers={'Authorization': 'Bearer %s' % rv.get_json()['token']})
+
+        self.assertEqual(404, rv_interaction.status_code)
+
+    def testCreateImplicitInteraction(self):
+        rv, u = self._fixture_get_token()
+        m = Movie(title='t', description='t')
+        db.session.add(m)
+        db.session.commit()
+
+        rv_interaction = self.client.post('/api/interaction',
+                                          json={'movie_id': m.id, 'user_id': u.id},
+                                          headers={'Authorization': 'Bearer %s' % rv.get_json()['token']})
+
+        self.assertEqual(201, rv_interaction.status_code)
+        self.assertEqual({'code': 201,
+                          'type': 'Created',
+                          'message': 'interaction registered'},
+                         rv_interaction.get_json())
+        i = Interaction.query.filter_by(user_id=u.id, movie_id=m.id).first()
+        self.assertEqual(u.id, i.user_id)
+        self.assertEqual(m.id, i.movie_id)
+        self.assertEqual(Interaction.IMPLICIT_RATE, i.score)
+
+    def testCreateExplicitInteraction(self):
+        rv, u = self._fixture_get_token()
+        m = Movie(title='t', description='t')
+        db.session.add(m)
+        db.session.commit()
+
+        rv_interaction = self.client.post('/api/interaction',
+                                          json={'movie_id': m.id, 'user_id': u.id, 'rating': 3},
+                                          headers={'Authorization': 'Bearer %s' % rv.get_json()['token']})
+
+        self.assertEqual(201, rv_interaction.status_code)
+        self.assertEqual({'code': 201,
+                          'type': 'Created',
+                          'message': 'interaction registered'},
+                         rv_interaction.get_json())
+        i = Interaction.query.filter_by(user_id=u.id, movie_id=m.id).first()
+        self.assertEqual(u.id, i.user_id)
+        self.assertEqual(m.id, i.movie_id)
+        self.assertEqual(3, i.score)
+
+    def testAccessDeniedGetInteractionImplicit(self):
+        rv, u = self._fixture_get_token()
+
+        rv_interaction = self.client.get('/api/interaction/%d:%d/implicit' % (2, 1),
+                                          headers={'Authorization': 'Bearer %s' % rv.get_json()['token']})
+
+        self.assertEqual(403, rv_interaction.status_code)
+        self.assertEqual({'code': 403,
+                          'type': 'Access denied',
+                          'message': None},
+                         rv_interaction.get_json())
+
+    def testMovieNotFoundInteractionImplicit(self):
+        rv, u = self._fixture_get_token()
+
+        rv_interaction = self.client.get('/api/interaction/%d:%d/implicit' % (u.id, 1),
+                                          headers={'Authorization': 'Bearer %s' % rv.get_json()['token']})
+
+        self.assertEqual(400, rv_interaction.status_code)
+
+    def testGetInteractionImplicit(self):
+        rv, u = self._fixture_get_token()
+        m = Movie(title='t', description='t')
+        u.watch(m)
+        db.session.add(m)
+        db.session.commit()
+
+        rv_interaction = self.client.get('/api/interaction/%d:%d/implicit' % (u.id, m.id),
+                                          headers={'Authorization': 'Bearer %s' % rv.get_json()['token']})
+
+        self.assertEqual(200, rv_interaction.status_code)
+        self.assertEqual(m.id, rv_interaction.get_json()['movie_id'])
+        self.assertEqual(u.id, rv_interaction.get_json()['user_id'])
+
+    def testAccessDeniedGetInteractionExplicit(self):
+        rv, u = self._fixture_get_token()
+
+        rv_interaction = self.client.get('/api/interaction/%d:%d/explicit' % (2, 1),
+                                          headers={'Authorization': 'Bearer %s' % rv.get_json()['token']})
+
+        self.assertEqual(403, rv_interaction.status_code)
+        self.assertEqual({'code': 403,
+                          'type': 'Access denied',
+                          'message': None},
+                         rv_interaction.get_json())
+
+    def testMovieNotFoundInteractionExplicit(self):
+        rv, u = self._fixture_get_token()
+
+        rv_interaction = self.client.get('/api/interaction/%d:%d/explicit' % (u.id, 1),
+                                          headers={'Authorization': 'Bearer %s' % rv.get_json()['token']})
+
+        self.assertEqual(400, rv_interaction.status_code)
+
+    def testGetInteractionExplicit(self):
+        rv, u = self._fixture_get_token()
+        m = Movie(title='t', description='t')
+        u.watch_rate(m, 3.5)
+        db.session.add(m)
+        db.session.commit()
+
+        rv_interaction = self.client.get('/api/interaction/%d:%d/explicit' % (u.id, m.id),
+                                          headers={'Authorization': 'Bearer %s' % rv.get_json()['token']})
+
+        self.assertEqual(200, rv_interaction.status_code)
+        self.assertEqual(m.id, rv_interaction.get_json()['movie_id'])
+        self.assertEqual(u.id, rv_interaction.get_json()['user_id'])
+        self.assertEqual(3.5 , rv_interaction.get_json()['rating'])
