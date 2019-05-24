@@ -140,9 +140,9 @@ class ApiCase(unittest.TestCase):
             '_meta': {'page': 1, 'per_page': 10, 'total_items': 2, 'total_pages': 1},
             'items': [
                 {'_links': {'self': 'http://localhost:5000/api/movie/1', 'video': None},
-                 'description': 'd0', 'id': 1, 'rating': {'score': 0.0, 'support': 0}, 'title': 't0'},
+                 'description': 'd0', 'id': 1, 'imdbId': 0, 'tmdbId': 0, 'rating': {'score': 0.0, 'support': 0}, 'title': 't0'},
                 {'_links': {'self': 'http://localhost:5000/api/movie/2', 'video': None},
-                 'description': 'd1', 'id': 2, 'rating': {'score': 0.0, 'support': 0}, 'title': 't1'},
+                 'description': 'd1', 'id': 2, 'imdbId': 0, 'tmdbId': 0, 'rating': {'score': 0.0, 'support': 0}, 'title': 't1'},
             ]
         }
 
@@ -182,7 +182,8 @@ class ApiCase(unittest.TestCase):
             '_meta': {'page': 1, 'per_page': 10, 'total_items': 1, 'total_pages': 1},
             'items': [
                 {'_links': {'self': 'http://localhost:5000/api/movie/2', 'video': None},
-                 'description': 'd2', 'id': 2, 'rating': {'score': 0.0, 'support': 0}, 'title': 't2'},
+                 'description': 'd2', 'id': 2, 'imdbId': 0, 'tmdbId': 0,
+                 'rating': {'score': 0.0, 'support': 0}, 'title': 't2'},
             ]
         }
 
@@ -202,7 +203,7 @@ class ApiCase(unittest.TestCase):
         expected = {
             '_links': {'self': 'http://localhost:5000/api/movie/1', 'video': None},
             'description': 'd',
-            'id': 1,
+            'id': 1, 'imdbId': 0, 'tmdbId': 0,
             'rating': {'score': 0.0, 'support': 0},
             'title': 't'
         }

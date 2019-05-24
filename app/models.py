@@ -135,6 +135,8 @@ class PaginatedAPIMixin(object):
 
 class Movie(PaginatedAPIMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    imdb_id = db.Column(db.Integer, default=0)
+    tmdb_id = db.Column(db.Integer, default=0)
     title = db.Column(db.String(64), index=True, unique=True)
     description = db.Column(db.Text())
     video = db.Column(db.String(64))
@@ -147,6 +149,8 @@ class Movie(PaginatedAPIMixin, db.Model):
         score, support = Interaction.compute_explicit_rate(self.id)
         data = {
             'id': self.id,
+            'imdbId': self.imdb_id,
+            'tmdbId': self.tmdb_id,
             'title': self.title,
             'description': self.description,
             'rating': {

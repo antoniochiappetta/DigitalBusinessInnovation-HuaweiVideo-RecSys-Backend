@@ -454,6 +454,12 @@ definitions:
       id:
         type: "integer"
         format: "int64"
+      imdbId:
+        type: "integer"
+        format: "int64"
+      tmdbId:
+        type: "integer"
+        format: "int64"
       title:
         type: "string"
         example: "Pulp Fiction"

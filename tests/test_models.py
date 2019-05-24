@@ -96,7 +96,7 @@ class UserModelCase(unittest.TestCase):
         db.session.add(m)
         db.session.commit()
 
-        json = {'id': 1, 'title': 'T', 'description': 'D',
+        json = {'id': 1, 'imdbId': 0, 'tmdbId': 0, 'title': 'T', 'description': 'D',
             'rating': {
                 'score': 0.0,
                 'support': 0
