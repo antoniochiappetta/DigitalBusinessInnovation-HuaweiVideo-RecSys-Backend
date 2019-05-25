@@ -139,7 +139,7 @@ class Movie(PaginatedAPIMixin, db.Model):
     tmdb_id = db.Column(db.Integer, default=0)
     title = db.Column(db.String(64), index=True, unique=True)
     description = db.Column(db.Text())
-    video = db.Column(db.String(64))
+    ytbe_id = db.Column(db.String(32), default="0")
     spectators = db.relationship('Interaction', back_populates='movie')
 
     def __repr__(self):
@@ -151,6 +151,7 @@ class Movie(PaginatedAPIMixin, db.Model):
             'id': self.id,
             'imdbId': self.imdb_id,
             'tmdbId': self.tmdb_id,
+            'ytbeId': self.ytbe_id,
             'title': self.title,
             'description': self.description,
             'rating': {
@@ -158,8 +159,7 @@ class Movie(PaginatedAPIMixin, db.Model):
                 'support': support
             },
             '_links': {
-                'self': url_for('api.get_movie', id=self.id, _external=True),
-                'video': self.video
+                'self': url_for('api.get_movie', id=self.id, _external=True)
             }
         }
         return data

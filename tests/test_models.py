@@ -92,18 +92,17 @@ class UserModelCase(unittest.TestCase):
         self.assertEqual(json, u.to_dict(include_email=True))
 
     def test_movie_to_dict(self):
-        m = Movie(title='T', description='D', video='v')
+        m = Movie(title='T', description='D', imdb_id='2', tmdb_id='4', ytbe_id='v')
         db.session.add(m)
         db.session.commit()
 
-        json = {'id': 1, 'imdbId': 0, 'tmdbId': 0, 'title': 'T', 'description': 'D',
+        json = {'id': 1, 'imdbId': 2, 'tmdbId': 4, 'ytbeId': 'v', 'title': 'T', 'description': 'D',
             'rating': {
                 'score': 0.0,
                 'support': 0
             },
             '_links': {
-                'self': 'http://localhost:5000/api/movie/1',
-                'video': 'v'
+                'self': 'http://localhost:5000/api/movie/1'
             }
         }
 
