@@ -7,7 +7,7 @@ from app.api.auth import basic_auth, token_auth
 @bp.route('/token', methods=['POST'])
 @basic_auth.login_required
 def get_token():
-    token = g.current_user.get_token()
+    token = g.current_user.get_token(expires_in=2592000)  # expires in one month
     db.session.commit()
     return jsonify({'token': token, 'sub': g.current_user.id})
 
