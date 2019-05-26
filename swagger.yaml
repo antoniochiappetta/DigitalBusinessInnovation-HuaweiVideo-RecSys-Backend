@@ -127,11 +127,9 @@ paths:
       parameters:
       - name: "q"
         in: "query"
-        description: "Keyword values that need to be considered for filter"
+        description: "Keyword values that need to be considered for filter (free form text)"
         required: true
-        type: "array"
-        items:
-          type: "string"
+        type: "string"
         collectionFormat: "multi"
       - name: "page"
         in: query

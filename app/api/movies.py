@@ -1,9 +1,9 @@
-from flask import jsonify, request, current_app, g
+from flask import jsonify, request, g
 from sqlalchemy import func
-from app import db
 from app.api import bp
 from app.api.auth import token_auth
 from app.models import Movie, Interaction
+from app.searches import search_movie
 
 
 TOP_POPULAR_PER_PAGE_MIN = 10
@@ -55,3 +55,15 @@ def get_recommended_movies(id):
 @token_auth.login_required
 def get_movie(id):
     return jsonify(Movie.query.get_or_404(id, description='Movie not found').to_dict())
+
+
+@bp.route('/movie/searchByKeywords', methods=['GET'])
+# TODO @token_auth.login_required
+def get_search_by_keywords():
+    q = request.args.get('q', '', type=str)
+    if q == '':
+        return jsonify([])
+
+    movies = search_movie(q)
+    result_dict = [m.to_dict() for m in movies]
+    return jsonify(result_dict)
