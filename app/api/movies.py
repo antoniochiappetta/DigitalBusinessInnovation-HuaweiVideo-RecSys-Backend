@@ -65,7 +65,7 @@ def get_search_by_keywords():
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', RECOMMENDED_PER_PAGE_MIN, type=int), RECOMMENDED_PER_PAGE_MAX)
 
-    movies_pagination = search_movie(q, per_page=per_page, page=page) if q != ' ' \
+    movies_pagination = search_movie(q, per_page=per_page, page=page) if q != ' ' and q != '' \
         else Pagination(None, 1, 0, 0, [])
 
     return jsonify(Movie.get_collection_dict(movies_pagination, 'api.get_search_by_keywords'))
