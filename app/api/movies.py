@@ -59,7 +59,7 @@ def get_movie(id):
 
 
 @bp.route('/movie/searchByKeywords', methods=['GET'])
-# TODO @token_auth.login_required
+@token_auth.login_required
 def get_search_by_keywords():
     q = request.args.get('q', '', type=str)
     page = request.args.get('page', 1, type=int)
