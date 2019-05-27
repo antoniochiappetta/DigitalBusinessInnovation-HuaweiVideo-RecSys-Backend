@@ -56,12 +56,12 @@ class User(UserMixin, db.Model):
             Interaction.movie_id == movie.id,
             Interaction.score != Interaction.IMPLICIT_RATE).count() > 0
 
-    def get_token(self, expires_in=3600):
+    def get_token(self, expires_in=1):
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
             return self.token
         self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
-        self.token_expiration = now + timedelta(seconds=expires_in)
+        self.token_expiration = now + timedelta(days=expires_in)
         db.session.add(self)
         return self.token
 
