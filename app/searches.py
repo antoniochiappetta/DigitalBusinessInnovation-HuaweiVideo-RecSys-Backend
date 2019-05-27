@@ -7,7 +7,7 @@ from flask_sqlalchemy import Pagination
 def search_movie(search_text, page, per_page):
     sql = text('''
         WITH similar_words AS (
-            SELECT string_agg(word, ' ') AS words
+            SELECT string_agg(word, ' & ') AS words
             FROM (
                 SELECT word
                 FROM unique_lexeme
@@ -24,6 +24,8 @@ def search_movie(search_text, page, per_page):
         OFFSET :offset_page
     ''')  # TODO consider in conditionally recounting because should get few items every time
     # TODO if there are only stop words, search them only in title (disable warnings)
+    # TODO for each element of tsvector, we could get the similar word
+    #      (e.g. "the prestige" query cannot find "Prestige, the")
     sql = sql.bindparams(keywords=search_text, per_page=per_page, offset_page=((page-1) * per_page))
     result = db.engine.execute(sql).fetchall()
     total_count = result[0][1] if len(result) > 0 else 0
