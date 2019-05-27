@@ -1,5 +1,6 @@
 from flask import jsonify, request, g
 from sqlalchemy import func
+from flask_sqlalchemy import Pagination
 from app.api import bp
 from app.api.auth import token_auth
 from app.models import Movie, Interaction
@@ -61,9 +62,10 @@ def get_movie(id):
 # TODO @token_auth.login_required
 def get_search_by_keywords():
     q = request.args.get('q', '', type=str)
-    if q == '':
-        return jsonify([])
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', RECOMMENDED_PER_PAGE_MIN, type=int), RECOMMENDED_PER_PAGE_MAX)
 
-    movies = search_movie(q)
-    result_dict = [m.to_dict() for m in movies]
-    return jsonify(result_dict)
+    movies_pagination = search_movie(q, per_page=per_page, page=page) if q != ' ' \
+        else Pagination(None, 1, 0, 0, [])
+
+    return jsonify(Movie.get_collection_dict(movies_pagination, 'api.get_search_by_keywords'))
