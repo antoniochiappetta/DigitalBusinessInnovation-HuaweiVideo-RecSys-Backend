@@ -36,7 +36,8 @@ def get_watched_movies(id):
     user = g.current_user
     q = Movie.query\
         .join(Interaction)\
-        .filter(Interaction.user_id == user.id, Interaction.score == Interaction.IMPLICIT_RATE)
+        .filter(Interaction.user_id == user.id, Interaction.score == Interaction.IMPLICIT_RATE)\
+        .order_by(Interaction.timestamp.desc())
     data = Movie.to_collection_dict(q, page, per_page, 'api.get_watched_movies', id=user.id)
     return jsonify(data)
 
