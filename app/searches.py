@@ -7,13 +7,13 @@ from flask_sqlalchemy import Pagination
 def search_movie(search_text, page, per_page):
     sql = text('''
         WITH similar_words AS (
-            SELECT string_agg(word, ' & ') AS words
+            SELECT string_agg(word, ' | ') AS words
             FROM (
                 SELECT word
                 FROM unique_lexeme
                 WHERE word % '':keywords''
                 ORDER BY word <-> '':keywords''
-                LIMIT 5
+                LIMIT 2
             ) AS tab
         )
         SELECT id, count(*) OVER() AS full_count

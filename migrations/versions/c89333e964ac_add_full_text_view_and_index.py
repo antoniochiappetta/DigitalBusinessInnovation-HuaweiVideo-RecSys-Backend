@@ -18,13 +18,6 @@ depends_on = None
 
 trigger_tuples = [
     ('movie', 'title'),
-    ('movie', 'description'),
-]
-
-
-index_set = [
-    'tsv_movie_title',
-    'tsv_movie_description',
 ]
 
 
@@ -37,8 +30,7 @@ def upgrade():
         CREATE MATERIALIZED VIEW search_view AS (
             SELECT movie.id as id,
                    movie.title as title,
-                   setweight(to_tsvector('english', movie.title), 'A') ||
-                   setweight(to_tsvector('english', coalesce(movie.description)), 'B') as document
+                   to_tsvector('english', movie.title) as document
             FROM movie
         )
     '''))
@@ -78,8 +70,7 @@ def upgrade():
     conn.execute(sa.sql.text('''
         CREATE MATERIALIZED VIEW unique_lexeme AS
             SELECT word FROM ts_stat(
-            'SELECT to_tsvector(''simple'', title) || 
-                    to_tsvector(''simple'', description)
+            'SELECT to_tsvector(''simple'', title)
             FROM movie');
     '''))
 
