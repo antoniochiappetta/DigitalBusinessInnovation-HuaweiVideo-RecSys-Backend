@@ -1,6 +1,7 @@
 from flask import jsonify, request, g
 from sqlalchemy import func
 from flask_sqlalchemy import Pagination
+from app import db
 from app.api import bp
 from app.api.auth import token_auth
 from app.models import Movie, Interaction, Recommendation
@@ -52,6 +53,12 @@ def get_recommended_movies(id):
         .join(Recommendation, Recommendation.movie_id == Movie.id)\
         .filter(Recommendation.user_id == user.id)\
         .order_by(Recommendation.rank)
+    # Filter seen
+    q = q.filter(~Recommendation.movie_id.in_(db.session.query(Movie.id)
+                                              .join(Interaction)
+                                              .filter(Interaction.user_id == user.id,
+                                                      Interaction.score == Interaction.IMPLICIT_RATE)))
+    # TODO filter undesired
     data = Movie.to_collection_dict(q, page, per_page, 'api.get_recommended_movies', id=user.id)
     return jsonify(data)
 
