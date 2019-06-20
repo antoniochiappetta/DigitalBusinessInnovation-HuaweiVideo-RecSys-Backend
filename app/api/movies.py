@@ -56,8 +56,7 @@ def get_recommended_movies(id):
     # Filter seen
     q = q.filter(~Recommendation.movie_id.in_(db.session.query(Movie.id)
                                               .join(Interaction)
-                                              .filter(Interaction.user_id == user.id,
-                                                      Interaction.score == Interaction.IMPLICIT_RATE)))
+                                              .filter(Interaction.user_id == user.id)))
     # TODO filter undesired
     data = Movie.to_collection_dict(q, page, per_page, 'api.get_recommended_movies', id=user.id)
     return jsonify(data)

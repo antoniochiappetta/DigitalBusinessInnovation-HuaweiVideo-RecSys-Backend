@@ -22,7 +22,7 @@ def create_interaction():
         movie = Movie.query.get_or_404(data['movie_id'], description='Movie not found')
 
         if 'rating' in data:
-            if 1 <= data['rating'] <= 5:
+            if data['rating'] <= 5:
                 user.watch_rate(movie, data['rating'])
             else:
                 bad_input('Rating must be in between 1 and 5')

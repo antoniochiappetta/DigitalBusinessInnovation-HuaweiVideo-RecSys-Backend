@@ -336,7 +336,7 @@ paths:
       tags:
       - "interaction"
       summary: "Get the explicit rate"
-      description: "Get the explicit rate by the user for a specific movie"
+      description: "Get the explicit rate by the user for a specific movie. Negative ratings such as -1 equals unwatch"
       produces:
         - "application/xml"
         - "application/json"
