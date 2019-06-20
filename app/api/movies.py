@@ -3,7 +3,7 @@ from sqlalchemy import func
 from flask_sqlalchemy import Pagination
 from app.api import bp
 from app.api.auth import token_auth
-from app.models import Movie, Interaction
+from app.models import Movie, Interaction, Recommendation
 from app.searches import search_movie
 
 
@@ -48,8 +48,11 @@ def get_recommended_movies(id):
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', RECOMMENDED_PER_PAGE_MIN, type=int), RECOMMENDED_PER_PAGE_MAX)
     user = g.current_user
-    data = Movie.to_collection_dict(Movie.query, page, per_page, 'api.get_recommended_movies', id=user.id)
-    # TODO: setup recommendation
+    q = Movie.query\
+        .join(Recommendation, Recommendation.movie_id == Movie.id)\
+        .filter(Recommendation.user_id == user.id)\
+        .order_by(Recommendation.rank)
+    data = Movie.to_collection_dict(q, page, per_page, 'api.get_recommended_movies', id=user.id)
     return jsonify(data)
 
 

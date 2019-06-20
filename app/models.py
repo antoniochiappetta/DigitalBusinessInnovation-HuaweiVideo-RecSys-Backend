@@ -18,6 +18,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     watched_movies = db.relationship('Interaction', back_populates='user')
+    recommended_movies = db.relationship('Recommendation', back_populates='user')
     token = db.Column(db.String(32), index=True, unique=True)
     token_expiration = db.Column(db.DateTime)
     
@@ -209,3 +210,16 @@ class Interaction(db.Model):
 
     def __repr__(self):
         return '<Interaction user={} movie={}>'.format(self.user_id, self.movie_id)
+
+
+class Recommendation(db.Model):
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)  # Left
+    movie_id = db.Column(db.Integer)
+    rank = db.Column(db.Integer, primary_key=True)
+    recommender_name = db.Column(db.Text())
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    user = db.relationship('User', back_populates='recommended_movies')
+
+    def __repr__(self):
+        return '<Recommendation user={} movies={} rank={}>'.format(self.user_id, self.movie_id, self.rank)
